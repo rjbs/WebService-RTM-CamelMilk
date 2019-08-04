@@ -1,0 +1,43 @@
+#!perl
+use v5.24.0;
+use warnings;
+
+use lib 'lib';
+
+binmode *STDOUT, ':encoding(UTF-8)';
+
+use JSON::MaybeXS;
+use Path::Tiny;
+use WebService::RTM::CamelMilk;
+
+my $path = $ENV{CAMEL_MILK_CONFIG};
+
+die "no CAMEL_MILK_CONFIG\n" unless length $path;
+
+die "usage: rtmlist USERNAME\n" unless @ARGV == 1;
+
+my $username = $ARGV[0];
+
+my $dir = path($path);
+
+my $api_config = decode_json($dir->child('api.json')->slurp_utf8);
+my $tokenring  = decode_json($dir->child('tokens.json')->slurp_utf8);
+
+my ($auth, $more) = grep {; fc $_->{user}{username} eq fc $username }
+                    values %$tokenring;
+
+die "bizarre: you have more than one auth token for $username\n" if $more;
+
+die "no token on file for user $username; use cmilk authuser\n" unless $auth;
+
+my $milk = WebService::RTM::CamelMilk->new_standalone({
+  api_key     => $api_config->{key},
+  api_secret  => $api_config->{secret},
+  auth_token  => $auth->{token},
+});
+
+my $rsp = $milk->api_call('rtm.tasks.getList' => {})->get;
+
+die "it failed\n" unless $rsp->is_success;
+
+print JSON::MaybeXS->new->pretty->canonical->encode($rsp->_response);

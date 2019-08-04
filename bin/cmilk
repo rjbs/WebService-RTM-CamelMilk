@@ -1,0 +1,7 @@
+#!perl
+use strict;
+use warnings;
+
+use WebService::RTM::CamelMilk::App;
+
+WebService::RTM::CamelMilk::App->new->run;
