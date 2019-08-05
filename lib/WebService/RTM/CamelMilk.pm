@@ -1,4 +1,4 @@
-use v5.24.0;
+use v5.20.0;
 use warnings;
 
 package WebService::RTM::CamelMilk;
@@ -6,7 +6,7 @@ package WebService::RTM::CamelMilk;
 
 use Moo;
 
-use experimental qw(lexical_subs signatures);
+use experimental qw(lexical_subs postderef signatures);
 
 use Digest::MD5 ();
 use JSON::MaybeXS ();
