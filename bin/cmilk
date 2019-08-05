@@ -1,6 +1,7 @@
 #!perl
 use strict;
 use warnings;
+# PODNAME: cmilk
 
 use WebService::RTM::CamelMilk::App;
 
