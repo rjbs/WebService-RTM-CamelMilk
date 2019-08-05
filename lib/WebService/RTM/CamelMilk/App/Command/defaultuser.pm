@@ -32,13 +32,8 @@ sub execute ($self, $opt, $args) {
     dir => $opt->config,
   });
 
-  my $tokens = $authmgr->load_tokens;
-
-  my ($user, $more) = grep {; fc $_->{user}{username} eq fc $username }
-                      values %$tokens;
-
-  die "no user with username $username\n" unless $user;
-  die "woah, multiple users with that username!\n" if $more;
+  my $user = $authmgr->auth_for_username($username);
+  die "Can't resolve $username to a stored token\n" unless $user;
 
   $authmgr->config->{default_user} = $user->{user}{id};
   $authmgr->save_config;
