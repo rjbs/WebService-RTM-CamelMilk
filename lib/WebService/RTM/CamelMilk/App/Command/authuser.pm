@@ -16,40 +16,29 @@ sub opt_spec {
       { default => $ENV{CAMEL_MILK_CONFIG} } ],
     [ 'permissions|p=s', 'permissions to request: read, write, or delete',
       { default => 'delete' } ],
-    [],
-    [ 'debug', 'print full response when something goes wrong' ],
   );
 }
 
 sub execute ($self, $opt, $args) {
-  die "config directory not provided\n" unless $opt->config;
+  die "config directory not provided\n" unless length $opt->config;
   die "config directory does not exist or is not a directory\n"
     unless -d $opt->config;
 
-  require JSON::MaybeXS;
-  require Path::Tiny;
+  require WebService::RTM::CamelMilk::AuthMgr::Dir;
 
-  my $dir = Path::Tiny::path($opt->config);
-  my $fn  = $dir->child('api.json');
-
-  die "config directory does not contain an api.json file\n"
-    unless -e $fn;
-
-  my $JSON = JSON::MaybeXS->new->canonical;
-
-  open my $api_fh, '<', $fn or die "error opening $fn to read: $!\n";
-  my $api_config = $JSON->decode(scalar do { local $/; <$api_fh> });
+  my $authmgr = WebService::RTM::CamelMilk::AuthMgr::Dir->new({
+    dir => $opt->config,
+  });
 
   require WebService::RTM::CamelMilk;
   my $milk = WebService::RTM::CamelMilk->new_standalone({
-    api_key     => $api_config->{key},
-    api_secret  => $api_config->{secret},
+    api_key     => $authmgr->config->{api_key},
+    api_secret  => $authmgr->config->{api_secret},
   });
 
   my $frob_rsp = $milk->api_call('rtm.auth.getFrob' => {})->get;
 
   unless ($frob_rsp->is_success) {
-    print $JSON->encode({ %$frob_rsp }) if $opt->debug;
     die "Something went wrong initializing our authentication request.\n"
   }
 
@@ -92,30 +81,10 @@ EOT
   printf "Token for user %s acquired: %s\n",
     $auth->{user}{username}, $auth->{token};
 
-  my $tokenring = {}; # I know that's not what a token ring is.
-  my $token_fn = $dir->child('tokens.json');
+  my $result = $authmgr->add_token($auth);
+  printf "token $result\n";
 
-  if (-e $token_fn) {
-    open my $token_fh, '<', $token_fn
-      or die "error opening $token_fn to read: $!\n";
-    $tokenring = $JSON->decode(scalar do { local $/; <$token_fh> });
-  }
-
-  if (my $existing = $tokenring->{ $auth->{user}{id} }) {
-    my $old = $JSON->encode($existing);
-    my $new = $JSON->encode($auth);
-
-    if ($old eq $new) {
-      print "authentication already on file\n";
-      exit;
-    }
-
-    warn "replacing existing token for user\n";
-  }
-
-  $tokenring->{ $auth->{user}{id} } = $auth;
-
-  $token_fn->spew( $JSON->encode( $tokenring ) );
+  $authmgr->save_tokens;
 
   print "token file updated!\n";
 

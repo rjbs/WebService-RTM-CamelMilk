@@ -14,26 +14,28 @@ sub opt_spec {
   return (
     [ 'api-secret=s', 'your API secret', { required => 1 } ],
     [ 'api-key=s',    'your API key',    { required => 1 } ],
-    [ 'dir|d=s',      'directory in which to write config', { required => 1 } ],
+    [ 'dir|d=s',      'directory in which to write config',
+      { default => $ENV{CAMEL_MILK_CONFIG} } ],
   );
 }
 
 sub execute ($self, $opt, $args) {
+  die "target directory not provided\n" unless length $opt->dir;
   die "target directory already exists\n" if -e $opt->dir;
   die "error creating target directory: $!\n" unless mkdir $opt->dir;
 
-  require JSON::MaybeXS;
-  require Path::Tiny;
+  require WebService::RTM::CamelMilk::AuthMgr::Dir;
 
-  my $fn = Path::Tiny::path($opt->dir)->child('api.json');
-  open my $fh, '>', $fn or die "error opening $fn to write: $!\n";
-
-  print {$fh} JSON::MaybeXS->new->canonical->pretty->encode({
-    secret => $opt->api_secret,
-    key    => $opt->api_key,
+  my $authmgr = WebService::RTM::CamelMilk::AuthMgr::Dir->new({
+    dir => $opt->dir,
   });
 
-  close $fh or die "error closing $fn after writing: $!\n";
+  $authmgr->config({
+    api_secret => $opt->api_secret,
+    api_key    => $opt->api_key,
+  });
+
+  $authmgr->save_config;
 
   return;
 }
