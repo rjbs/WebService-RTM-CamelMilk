@@ -37,10 +37,11 @@ if ($username) {
 my $milk = WebService::RTM::CamelMilk->new_standalone({
   api_key     => $authmgr->config->{api_key},
   api_secret  => $authmgr->config->{api_secret},
-  auth_token  => $auth->{token},
 });
 
-my $rsp = $milk->api_call('rtm.tasks.getList' => {})->get;
+my $rsp = $milk->api_call('rtm.tasks.getList' => {
+  auth_token => $auth->{token},
+})->get;
 
 die "it failed\n" unless $rsp->is_success;
 

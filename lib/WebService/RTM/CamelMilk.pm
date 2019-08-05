@@ -22,8 +22,6 @@ has rest_uri => (is => 'ro', default => $REST_URI);
 has api_key    => (is => 'ro', required => 1);
 has api_secret => (is => 'ro', required => 1);
 
-has auth_token => (is => 'ro');
-
 has http_client => (is => 'ro', required => 1);
 
 sub _signed_content ($self, $call) {
@@ -32,7 +30,6 @@ sub _signed_content ($self, $call) {
 
   my %call = (
     api_key => $self->api_key,
-    (defined $self->auth_token ? (auth_token => $self->auth_token) : ()),
     %$call,
   );
 
