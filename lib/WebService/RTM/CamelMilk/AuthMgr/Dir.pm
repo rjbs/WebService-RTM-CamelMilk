@@ -2,6 +2,7 @@ use v5.24.0;
 use warnings;
 
 package WebService::RTM::CamelMilk::AuthMgr::Dir;
+# ABSTRACT: an auth manager that stores things in a directory on disk
 
 use Moo;
 

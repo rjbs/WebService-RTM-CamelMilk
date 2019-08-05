@@ -2,6 +2,8 @@ use strict;
 use warnings;
 
 package WebService::RTM::CamelMilk::App::Command::initapi;
+# ABSTRACT: initialize config for an API registration
+
 use WebService::RTM::CamelMilk::App -command;
 
 use experimental qw(lexical_subs signatures);

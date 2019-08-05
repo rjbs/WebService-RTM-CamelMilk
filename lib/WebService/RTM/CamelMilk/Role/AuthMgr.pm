@@ -2,6 +2,7 @@ use v5.24.0;
 use warnings;
 
 package WebService::RTM::CamelMilk::Role::AuthMgr;
+# ABSTRACT: something for storing CamelMilk config and tokens
 
 use Moo::Role;
 

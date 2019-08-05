@@ -2,6 +2,8 @@ use v5.24.0;
 use warnings;
 
 package WebService::RTM::CamelMilk::App::Command::defaultuser;
+# ABSTRACT: set the default API user
+
 use WebService::RTM::CamelMilk::App -command;
 
 use experimental qw(lexical_subs signatures);

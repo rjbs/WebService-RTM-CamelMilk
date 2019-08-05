@@ -2,6 +2,8 @@ use v5.24.0;
 use warnings;
 
 package WebService::RTM::CamelMilk;
+# ABSTRACT: an client for Remember The Milk
+
 use Moo;
 
 use experimental qw(lexical_subs signatures);
@@ -92,6 +94,7 @@ sub api_call ($self, $name, $arg = {}) {
 }
 
 package WebService::RTM::CamelMilk::Standalone {
+  # ABSTRACT: a client with its own event loop, for use in synchronous code
 
   use Moo;
   extends 'WebService::RTM::CamelMilk';
@@ -102,6 +105,7 @@ package WebService::RTM::CamelMilk::Standalone {
 }
 
 package WebService::RTM::CamelMilk::APIResponse {
+  # ABSTRACT: what you get when you make an API call
 
   use Moo;
 

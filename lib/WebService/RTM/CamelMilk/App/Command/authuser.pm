@@ -2,11 +2,14 @@ use strict;
 use warnings;
 
 package WebService::RTM::CamelMilk::App::Command::authuser;
+# ABSTRACT: set up an authentication for an RTM user
+
+
 use WebService::RTM::CamelMilk::App -command;
 
 use experimental qw(lexical_subs signatures);
 
-sub abstract { 'setup an authentication for an RTM user' }
+sub abstract { 'set up an authentication for an RTM user' }
 
 sub usage_desc { '%c authuser %o' }
 
