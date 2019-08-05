@@ -9,30 +9,34 @@ binmode *STDOUT, ':encoding(UTF-8)';
 use JSON::MaybeXS;
 use Path::Tiny;
 use WebService::RTM::CamelMilk;
+use WebService::RTM::CamelMilk::AuthMgr::Dir;
 
 my $path = $ENV{CAMEL_MILK_CONFIG};
 
 die "no CAMEL_MILK_CONFIG\n" unless length $path;
 
-die "usage: rtmlist USERNAME\n" unless @ARGV == 1;
+my $authmgr = WebService::RTM::CamelMilk::AuthMgr::Dir->new({
+  dir => $path
+});
+
+die "usage: rtmlist USERNAME\n" if @ARGV > 1;
 
 my $username = $ARGV[0];
 
-my $dir = path($path);
-
-my $api_config = decode_json($dir->child('api.json')->slurp_utf8);
-my $tokenring  = decode_json($dir->child('tokens.json')->slurp_utf8);
-
-my ($auth, $more) = grep {; fc $_->{user}{username} eq fc $username }
-                    values %$tokenring;
-
-die "bizarre: you have more than one auth token for $username\n" if $more;
-
-die "no token on file for user $username; use cmilk authuser\n" unless $auth;
+my $auth;
+if ($username) {
+  $auth = $authmgr->auth_for_username($username);
+  die "can't get token for username $username\n" unless $auth;
+} elsif (my $default = $authmgr->config->{default_user}) {
+  $auth = $authmgr->tokens->{ $default };
+  die "default token no longer exists\n" unless $auth;
+} else {
+  die "no username given and no default user\n";
+}
 
 my $milk = WebService::RTM::CamelMilk->new_standalone({
-  api_key     => $api_config->{key},
-  api_secret  => $api_config->{secret},
+  api_key     => $authmgr->config->{api_key},
+  api_secret  => $authmgr->config->{api_secret},
   auth_token  => $auth->{token},
 });
 
