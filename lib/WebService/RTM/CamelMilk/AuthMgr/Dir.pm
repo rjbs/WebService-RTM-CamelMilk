@@ -4,7 +4,6 @@ use warnings;
 package WebService::RTM::CamelMilk::AuthMgr::Dir;
 
 use Moo;
-with 'WebService::RTM::CamelMilk::Role::AuthMgr';
 
 use experimental qw(lexical_subs signatures);
 
@@ -72,5 +71,7 @@ sub add_token ($self, $auth) {
   $tokens->{ $auth->{user}{id} } = $auth;
   return $status;
 }
+
+with 'WebService::RTM::CamelMilk::Role::AuthMgr';
 
 1;
