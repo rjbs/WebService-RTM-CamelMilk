@@ -41,6 +41,7 @@ my $milk = WebService::RTM::CamelMilk->new_standalone({
 
 my $rsp = $milk->api_call('rtm.tasks.getList' => {
   auth_token => $auth->{token},
+  filter     => 'status:incomplete',
 })->get;
 
 die "it failed\n" unless $rsp->is_success;
