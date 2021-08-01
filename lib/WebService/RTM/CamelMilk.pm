@@ -2,7 +2,7 @@ use v5.20.0;
 use warnings;
 
 package WebService::RTM::CamelMilk;
-# ABSTRACT: an client for Remember The Milk
+# ABSTRACT: a client for Remember The Milk
 
 use Moo;
 
