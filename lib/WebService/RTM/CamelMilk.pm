@@ -9,6 +9,7 @@ use Moo;
 use experimental qw(lexical_subs postderef signatures);
 
 use Digest::MD5 ();
+use Encode ();
 use JSON::MaybeXS ();
 use URI;
 use URI::Escape qw(uri_escape_utf8);
@@ -36,7 +37,7 @@ sub _signed_content ($self, $call) {
   );
 
   for (sort keys %call) {
-    $str .= "$_$call{$_}";
+    $str .= Encode::encode('utf-8', "$_$call{$_}");
     push @hunks, join q{=}, uri_escape_utf8($_), uri_escape_utf8($call{$_});
   }
 
