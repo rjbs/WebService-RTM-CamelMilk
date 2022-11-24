@@ -1,4 +1,4 @@
-use v5.20.0;
+use v5.34.0;
 use warnings;
 
 package WebService::RTM::CamelMilk::Role::AuthMgr;
@@ -6,7 +6,8 @@ package WebService::RTM::CamelMilk::Role::AuthMgr;
 
 use Moo::Role;
 
-use experimental qw(lexical_subs postderef signatures);
+use feature qw(lexical_subs postderef_qq);
+use experimental qw(signatures);
 
 requires 'config';
 requires 'load_config';

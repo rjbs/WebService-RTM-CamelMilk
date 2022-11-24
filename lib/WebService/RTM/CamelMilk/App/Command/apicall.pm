@@ -1,13 +1,13 @@
-use strict;
+use v5.34.0;
 use warnings;
 
 package WebService::RTM::CamelMilk::App::Command::apicall;
 # ABSTRACT: make an arbitrary API call
 
-
 use WebService::RTM::CamelMilk::App -command;
 
-use experimental qw(lexical_subs signatures);
+use feature qw(lexical_subs postderef_qq);
+use experimental qw(signatures);
 
 sub abstract { 'set up an authentication for an RTM user' }
 

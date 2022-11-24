@@ -1,4 +1,4 @@
-use v5.20.0;
+use v5.34.0;
 use warnings;
 
 package WebService::RTM::CamelMilk::AuthMgr::Dir;
@@ -6,7 +6,8 @@ package WebService::RTM::CamelMilk::AuthMgr::Dir;
 
 use Moo;
 
-use experimental qw(lexical_subs postderef signatures);
+use feature qw(lexical_subs postderef_qq);
+use experimental qw(signatures);
 
 use JSON::MaybeXS ();
 use Path::Tiny;

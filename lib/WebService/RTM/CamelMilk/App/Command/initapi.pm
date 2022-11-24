@@ -1,4 +1,4 @@
-use strict;
+use v5.34.0;
 use warnings;
 
 package WebService::RTM::CamelMilk::App::Command::initapi;
@@ -6,7 +6,8 @@ package WebService::RTM::CamelMilk::App::Command::initapi;
 
 use WebService::RTM::CamelMilk::App -command;
 
-use experimental qw(lexical_subs signatures);
+use feature qw(lexical_subs postderef_qq);
+use experimental qw(signatures);
 
 sub abstract { 'initialize config for an API registration' }
 
