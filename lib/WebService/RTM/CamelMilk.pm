@@ -11,6 +11,8 @@ use experimental qw(signatures);
 
 use Digest::MD5 ();
 use Encode ();
+use Future::AsyncAwait;
+use Future::Exception;
 use JSON::MaybeXS ();
 use URI;
 use URI::Escape qw(uri_escape_utf8);
@@ -45,8 +47,8 @@ sub _signed_content ($self, $call) {
   return join q{&}, @hunks, 'api_sig=' . Digest::MD5::md5_hex($str);
 }
 
-sub api_call ($self, $name, $arg = {}) {
-  my $res_f = $self->http_client->do_request(
+async sub api_call ($self, $name, $arg = {}) {
+  my $res = await $self->http_client->do_request(
     uri    => $self->rest_uri,
     method => 'POST',
     content_type => 'application/x-www-form-urlencoded',
@@ -57,42 +59,38 @@ sub api_call ($self, $name, $arg = {}) {
     }),
   );
 
-  return $res_f->then(sub ($res) {
-    unless ($res->is_success) {
-      return Future->fail(
-        "HTTP request to RTM API failed",
-        camel_milk => (response => $res),
-      );
-    }
-
-    my $data = $JSON->decode($res->decoded_content);
-
-    # {"rsp": {
-    #     "stat":"ok",
-    #     "auth":{
-    #       "token":"...",
-    #       "perms":"delete",
-    #       "user":{"id":"123","username":"jfblogs","fullname":"J. Blogs"}
-    #     } } }
-    return Future->done(
-      WebService::RTM::CamelMilk::APIResponse->from_payload($data)
+  unless ($res->is_success) {
+    Future::Exception->throw(
+      "HTTP request to RTM API failed",
+      camel_milk => (response => $res),
     );
-  });
-
-  sub new_standalone ($self, $arg = {}) {
-    require IO::Async::Loop;
-    require Net::Async::HTTP;
-
-    my $loop = IO::Async::Loop->new;
-    my $http = Net::Async::HTTP->new;
-    $loop->add($http);
-
-    return WebService::RTM::CamelMilk::Standalone->new({
-      %$arg,
-      _loop => $loop,
-      http_client => $http,
-    });
   }
+
+  my $data = $JSON->decode($res->decoded_content);
+
+  # {"rsp": {
+  #     "stat":"ok",
+  #     "auth":{
+  #       "token":"...",
+  #       "perms":"delete",
+  #       "user":{"id":"123","username":"jfblogs","fullname":"J. Blogs"}
+  #     } } }
+  return WebService::RTM::CamelMilk::APIResponse->from_payload($data);
+}
+
+sub new_standalone ($self, $arg = {}) {
+  require IO::Async::Loop;
+  require Net::Async::HTTP;
+
+  my $loop = IO::Async::Loop->new;
+  my $http = Net::Async::HTTP->new;
+  $loop->add($http);
+
+  return WebService::RTM::CamelMilk::Standalone->new({
+    %$arg,
+    _loop => $loop,
+    http_client => $http,
+  });
 }
 
 package WebService::RTM::CamelMilk::Standalone {
