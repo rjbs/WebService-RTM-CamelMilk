@@ -15,22 +15,30 @@ sub usage_desc { '%c authuser %o' }
 
 sub opt_spec {
   return (
-    [ 'config|c=s', 'directory where config lives',
-      { default => $ENV{CAMEL_MILK_CONFIG} } ],
+    [ 'config|c=s', 'directory where config lives' ],
     [ 'permissions|p=s', 'permissions to request: read, write, or delete',
       { default => 'delete' } ],
   );
 }
 
 sub execute ($self, $opt, $args) {
-  die "config directory not provided\n" unless length $opt->config;
-  die "config directory does not exist or is not a directory\n"
-    unless -d $opt->config;
+  my $config_dir = $opt->config
+                // $ENV{CAMEL_MILK_CONFIG}
+                // "$ENV{HOME}/.cmilk";
+
+  unless (length $config_dir) {
+    die "nonsensical empty config path given!\n";
+  }
+
+  unless (-d $config_dir) {
+    warn "config directory $config_dir does not exist; making it!\n";
+    mkdir($config_dir) or die "couldn't mkdir $config_dir: $!\n";
+  }
 
   require WebService::RTM::CamelMilk::AuthMgr::Dir;
 
   my $authmgr = WebService::RTM::CamelMilk::AuthMgr::Dir->new({
-    dir => $opt->config,
+    dir => $config_dir,
   });
 
   require WebService::RTM::CamelMilk;
