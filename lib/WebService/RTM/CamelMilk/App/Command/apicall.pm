@@ -9,7 +9,7 @@ use WebService::RTM::CamelMilk::App -command;
 use feature qw(lexical_subs postderef_qq);
 use experimental qw(signatures);
 
-sub abstract { 'set up an authentication for an RTM user' }
+sub abstract { 'make an arbitrary API call' }
 
 sub usage_desc { '%c authuser %o METHOD [PARAM=VALUE]...' }
 
