@@ -17,7 +17,7 @@ sub opt_spec {
   return (
     [ 'config|c=s', 'directory where config lives' ],
     [ 'username|u=s', 'username as whom to make the call' ],
-    [ 'pretty!',      'prettify JSON response; true by default' ],
+    [ 'pretty!',      'prettify JSON; true by default', { default => 1 } ],
   );
 }
 
@@ -62,7 +62,13 @@ sub execute ($self, $opt, $args) {
 
   my $rsp = $milk->api_call($method=> \%param)->get;
 
-  print JSON::MaybeXS->new->encode($rsp->_response);
+  my $json = JSON::MaybeXS->new;
+
+  if ($opt->pretty) {
+    $json->canonical->pretty
+  }
+
+  print $json->encode($rsp->_response);
 }
 
 1;
