@@ -17,6 +17,7 @@ sub opt_spec {
   return (
     [ 'config|c=s', 'directory where config lives' ],
     [ 'username|u=s', 'username as whom to make the call' ],
+    [ 'pretty!',      'prettify JSON response; true by default' ],
   );
 }
 
@@ -31,9 +32,12 @@ sub execute ($self, $opt, $args) {
 
   my ($method, @params) = @$args;
 
-  $self->usage->die("no method name given") unless $method;
+  unless ($method) {
+    $self->usage->die({ pre_text => "No method name given!\n\n" })
+  }
+
   my %param = map {;  m/=/ || die "params must be given in X=Y form\n";
-                      split /=/ } @params;
+                      split /=/, $_, 2 } @params;
 
   my $auth;
   if (my $username = $opt->username) {
