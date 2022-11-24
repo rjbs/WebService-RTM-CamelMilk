@@ -15,21 +15,18 @@ sub usage_desc { '%c authuser %o METHOD [PARAM=VALUE]...' }
 
 sub opt_spec {
   return (
-    [ 'config|c=s', 'directory where config lives',
-      { default => $ENV{CAMEL_MILK_CONFIG} } ],
+    [ 'config|c=s', 'directory where config lives' ],
     [ 'username|u=s', 'username as whom to make the call' ],
   );
 }
 
 sub execute ($self, $opt, $args) {
-  die "config directory not provided\n" unless length $opt->config;
-  die "config directory does not exist or is not a directory\n"
-    unless -d $opt->config;
+  my $config_dir = $self->get_existing_config_dir($opt);
 
   require WebService::RTM::CamelMilk::AuthMgr::Dir;
 
   my $authmgr = WebService::RTM::CamelMilk::AuthMgr::Dir->new({
-    dir => $opt->config,
+    dir => $config_dir,
   });
 
   my ($method, @params) = @$args;

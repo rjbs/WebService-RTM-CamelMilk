@@ -17,20 +17,21 @@ sub opt_spec {
   return (
     [ 'api-secret=s', 'your API secret', { required => 1 } ],
     [ 'api-key=s',    'your API key',    { required => 1 } ],
-    [ 'dir|d=s',      'directory in which to write config',
-      { default => $ENV{CAMEL_MILK_CONFIG} } ],
+    [ 'config|c=s',   'directory in which to write config' ],
   );
 }
 
 sub execute ($self, $opt, $args) {
-  die "target directory not provided\n" unless length $opt->dir;
-  die "target directory already exists\n" if -e $opt->dir;
-  die "error creating target directory: $!\n" unless mkdir $opt->dir;
+  my $config_dir = $self->get_config_dir($opt);
+
+  die "target directory not provided\n" unless length $config_dir;
+  die "target directory already exists\n" if -e $config_dir;
+  die "error creating target directory: $!\n" unless mkdir $config_dir;
 
   require WebService::RTM::CamelMilk::AuthMgr::Dir;
 
   my $authmgr = WebService::RTM::CamelMilk::AuthMgr::Dir->new({
-    dir => $opt->dir,
+    dir => $config_dir,
   });
 
   $authmgr->config({

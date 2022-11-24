@@ -15,15 +15,12 @@ sub usage_desc { '%c defaultuser %o USERNAME' }
 
 sub opt_spec {
   return (
-    [ 'config|c=s', 'directory where config lives',
-      { default => $ENV{CAMEL_MILK_CONFIG} } ],
+    [ 'config|c=s', 'directory where config lives' ],
   );
 }
 
 sub execute ($self, $opt, $args) {
-  die "config directory not provided\n" unless length $opt->config;
-  die "config directory does not exist or is not a directory\n"
-    unless -d $opt->config;
+  my $config_dir = $self->get_existing_config_dir($opt);
 
   $self->usage->die unless @$args == 1;
 
@@ -32,7 +29,7 @@ sub execute ($self, $opt, $args) {
   require WebService::RTM::CamelMilk::AuthMgr::Dir;
 
   my $authmgr = WebService::RTM::CamelMilk::AuthMgr::Dir->new({
-    dir => $opt->config,
+    dir => $config_dir,
   });
 
   my $user = $authmgr->auth_for_username($username);
